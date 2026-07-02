@@ -43,8 +43,8 @@ app.use('/api/tasks', taskRoutes);
 if (process.env.NODE_ENV === 'production') {
   const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
   app.use(express.static(frontendDist));
-  // Handle SPA routing — return index.html for all non-API routes
-  app.get('*', (req, res) => {
+  // SPA fallback — serve index.html for all non-API routes (Express 5 compatible)
+  app.use((req: express.Request, res: express.Response) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
