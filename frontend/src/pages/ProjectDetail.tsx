@@ -319,8 +319,8 @@ export const ProjectDetail: React.FC = () => {
     return name.charAt(0).toUpperCase();
   };
 
-  const renderRow = (label: string, value: string | null | undefined, isTitle = false, subValue?: string | null) => {
-    const hasValue = value && value.trim() !== '';
+  const renderRow = (label: string, value: React.ReactNode | null | undefined, isTitle = false, subValue?: string | null) => {
+    const hasValue = value !== undefined && value !== null && value !== '';
     return (
       <div style={{ 
         display: 'flex', 
@@ -348,7 +348,6 @@ export const ProjectDetail: React.FC = () => {
                 </div>
               )}
             </div>
-          ) : (
             hasValue ? (
               <span style={{ fontWeight: label === 'Chủ nhiệm' ? 700 : 400, color: 'var(--text-main)', lineHeight: 1.5 }}>
                 {value}
@@ -761,6 +760,33 @@ export const ProjectDetail: React.FC = () => {
                       {renderRow('Tổ chức chủ trì', project.hostOrganization)}
                       {renderRow('Chủ nhiệm', project.manager?.name)}
                       {renderRow('Cố vấn', project.advisor)}
+                      {renderRow('Thành viên tham gia', project.members && project.members.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {project.members.map((m: any) => (
+                            <span key={m.id} style={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '0.4rem', 
+                              backgroundColor: 'var(--bg-light)', 
+                              border: '1px solid var(--border-color)', 
+                              padding: '0.25rem 0.6rem', 
+                              borderRadius: '20px', 
+                              fontSize: '0.85rem',
+                              fontWeight: 500,
+                              color: 'var(--text-main)'
+                            }}>
+                              {m.avatar ? (
+                                <img src={m.avatar} alt={m.name} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+                              ) : (
+                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }}>
+                                  {getInitials(m.name)}
+                                </div>
+                              )}
+                              {m.name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : '')}
                       {renderRow('Thời gian', project.executionTime)}
                       {renderRow('Kinh phí', project.budget)}
                       {renderRow('Mục tiêu tổng quát', project.generalObjective || project.description)}
