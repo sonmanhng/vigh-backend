@@ -1,0 +1,281 @@
+import React, { useEffect, useState } from 'react';
+import { apiClient } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+
+const ALL_ROLES = [
+  { value: 'SuperAdmin', label: 'SuperAdmin - Quản Trị Cấp Cao' },
+  { value: 'VienTruong', label: 'Viện Trưởng - Ban Lãnh Đạo Viện' },
+  { value: 'VienPho', label: 'Viện Phó - Ban Lãnh Đạo Viện' },
+  { value: 'TruongPhong', label: 'Trưởng Phòng - Quản Lý Đơn Vị' },
+  { value: 'ChuyenVien', label: 'Chuyên Viên - Nghiên Cứu Viên' },
+];
+
+export const PersonnelManagement: React.FC = () => {
+  const { user } = useAuth();
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  
+  // New user form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('vigh123456');
+  const [role, setRole] = useState('ChuyenVien');
+  const [department, setDepartment] = useState('');
+  const [phone, setPhone] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  const isManagerOrAdmin = user && ['SuperAdmin', 'VienTruong', 'VienPho', 'TruongPhong', 'ADMIN', 'MANAGER'].includes(user.role);
+  const isTopAdmin = user && ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(user.role);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiClient.get('/users');
+      setUsers(res.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Không thể tải danh sách nhân sự');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      await apiClient.post('/users', {
+        name,
+        email,
+        password,
+        role,
+        department,
+        phone,
+        avatar,
+      });
+      setShowModal(false);
+      // Reset form
+      setName('');
+      setEmail('');
+      setPassword('vigh123456');
+      setRole('ChuyenVien');
+      setDepartment('');
+      setPhone('');
+      setAvatar('');
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản nhân sự');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleRoleChange = async (userId: number, newRole: string) => {
+    try {
+      await apiClient.put(`/users/${userId}`, { role: newRole });
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Không có quyền thay đổi chức vụ');
+    }
+  };
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa cán bộ "${userName}" khỏi hệ thống?`)) return;
+    try {
+      await apiClient.delete(`/users/${userId}`);
+      setUsers(users.filter(u => u.id !== userId));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Không thể xóa tài khoản này');
+    }
+  };
+
+  const getInitials = (n?: string) => {
+    if (!n) return 'V';
+    const parts = n.trim().split(' ');
+    if (parts.length > 1) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return n.charAt(0).toUpperCase();
+  };
+
+  const getRoleBadgeClass = (r: string) => {
+    if (['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(r)) return 'badge badge-danger';
+    if (['TruongPhong', 'MANAGER'].includes(r)) return 'badge badge-warning';
+    return 'badge badge-success';
+  };
+
+  if (loading) {
+    return <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Đang tải danh sách nhân sự Viện VIGH...</div>;
+  }
+
+  return (
+    <div className="content-area">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--primary)' }}>Quản Lý Nhân Sự Viện VIGH</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+            Danh sách cán bộ, chức danh công tác và phân quyền hệ thống
+          </p>
+        </div>
+
+        {isManagerOrAdmin && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            Thêm Nhân Sự Mới
+          </button>
+        )}
+      </div>
+
+      {error ? (
+        <div className="card" style={{ textAlign: 'center', color: 'var(--accent-red)', fontWeight: 600 }}>
+          {error}
+        </div>
+      ) : (
+        <div className="table-container">
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th>Cán bộ / Avatar</th>
+                <th>Tài khoản Email</th>
+                <th>Phòng Ban / Đơn vị</th>
+                <th>Số Điện Thoại</th>
+                <th>Chức Vụ (Role)</th>
+                {isManagerOrAdmin && <th style={{ textAlign: 'right' }}>Thao tác</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    Chưa có nhân sự nào trong hệ thống.
+                  </td>
+                </tr>
+              ) : (
+                users.map((u) => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                        {u.avatar ? (
+                          <img src={u.avatar} alt={u.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--primary)' }} />
+                        ) : (
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
+                            {getInitials(u.name)}
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{u.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: #{u.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{u.email}</span></td>
+                    <td>{u.department || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Chưa cập nhật</span>}</td>
+                    <td>{u.phone || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>---</span>}</td>
+                    <td>
+                      {isManagerOrAdmin ? (
+                        <select 
+                          className="select-field" 
+                          style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', width: 'auto', fontWeight: 600 }}
+                          value={u.role}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                          disabled={!isTopAdmin && u.id !== user?.id && ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(u.role)}
+                        >
+                          {ALL_ROLES.map(r => (
+                            <option key={r.value} value={r.value}>{r.label.split(' - ')[0]}</option>
+                          ))}
+                          {!ALL_ROLES.some(r => r.value === u.role) && <option value={u.role}>{u.role}</option>}
+                        </select>
+                      ) : (
+                        <span className={getRoleBadgeClass(u.role)}>{u.role}</span>
+                      )}
+                    </td>
+                    {isManagerOrAdmin && (
+                      <td style={{ textAlign: 'right' }}>
+                        {isTopAdmin && u.id !== user?.id && (
+                          <button 
+                            className="btn btn-danger btn-sm" 
+                            onClick={() => handleDeleteUser(u.id, u.name)}
+                            title="Xóa nhân sự"
+                          >
+                            Xóa
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal create user */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">Thêm Nhân Sự Mới Viện VIGH</div>
+              <button type="button" className="modal-close-btn" onClick={() => setShowModal(false)}>Đóng</button>
+            </div>
+            
+            <form onSubmit={handleCreateUser}>
+              <div className="modal-body">
+                <div className="input-group">
+                  <label className="input-label">Họ và tên cán bộ (*)</label>
+                  <input type="text" className="input-field" placeholder="VD: TS. Nguyễn Văn A" value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Email đăng nhập (*)</label>
+                  <input type="email" className="input-field" placeholder="nguyenvana@vigh.org" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Mật khẩu khởi tạo (*)</label>
+                  <input type="text" className="input-field" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Mặc định là vigh123456</span>
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Chức vụ / Quyền hạn (*)</label>
+                  <select className="select-field" value={role} onChange={(e) => setRole(e.target.value)}>
+                    {ALL_ROLES.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Phòng ban / Đơn vị</label>
+                  <input type="text" className="input-field" placeholder="VD: Phòng Nghiên cứu Dược liệu" value={department} onChange={(e) => setDepartment(e.target.value)} />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Số điện thoại</label>
+                  <input type="text" className="input-field" placeholder="VD: 0987 654 321" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Đường dẫn ảnh Avatar (URL)</label>
+                  <input type="url" className="input-field" placeholder="https://..." value={avatar} onChange={(e) => setAvatar(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} disabled={creating}>Hủy</button>
+                <button type="submit" className="btn btn-primary" disabled={creating}>{creating ? 'Đang thêm...' : 'Thêm Nhân Sự'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

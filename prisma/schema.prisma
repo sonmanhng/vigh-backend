@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         String    @default("ChuyenVien") // SuperAdmin, VienTruong, VienPho, TruongPhong, ChuyenVien (also legacy ADMIN, MANAGER, USER)
+  avatar       String?
+  department   String?
+  phone        String?
+  projects       Project[] @relation("ManagerProjects")
+  memberProjects Project[] @relation("ProjectMembers")
+  tasks          Task[]    @relation("AssigneeTasks")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Project {
+  id               Int       @id @default(autoincrement())
+  name             String
+  nameEn           String?
+  code             String?
+  projectType      String?
+  managementUnit   String?
+  hostOrganization String?
+  advisor          String?
+  executionTime    String?
+  budget           String?
+  generalObjective String?
+  description      String?
+  status           String    @default("PLANNING") // PLANNING, IN_PROGRESS, COMPLETED, ON_HOLD
+  startDate        DateTime?
+  endDate          DateTime?
+  managerId        Int?
+  manager          User?     @relation("ManagerProjects", fields: [managerId], references: [id])
+  members          User[]    @relation("ProjectMembers")
+  tasks            Task[]
+  researchContents ResearchContent[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("TODO") // TODO, IN_PROGRESS, REVIEW, DONE
+  progress    Int      @default(0) // 0 - 100
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  Int?
+  assignee    User?    @relation("AssigneeTasks", fields: [assigneeId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ResearchContent {
+  id          Int      @id @default(autoincrement())
+  code        String   // VD: ND1, ND2, ND3
+  title       String   // VD: Điều tra dân tộc học...
+  status      String   @default("Xong 100%") // VD: Xong 100%, Đang thực hiện
+  description String?  // VD: Thu thập tri thức bản địa...
+  activities  String?  // JSON string: '[{"activity":"...","result":"..."}]'
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
