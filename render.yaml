@@ -2,7 +2,7 @@ services:
   - type: web
     name: vigh-backend
     runtime: node
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build && cd frontend && npm install --include=dev && npm run build && cd ..
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npx prisma generate && npm run build && cd frontend && NPM_CONFIG_PRODUCTION=false npm install && npm run build && cd ..
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
