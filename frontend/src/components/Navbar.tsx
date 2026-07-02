@@ -19,6 +19,7 @@ export const Navbar: React.FC = () => {
     <>
       <header className="navbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <img src="/logo.png" alt="VIGH Logo" style={{ height: '36px', objectFit: 'contain' }} />
           <div className="navbar-title">HỆ THỐNG QUẢN LÝ ĐỀ TÀI & NHÂN SỰ VIGH</div>
           <span className="badge badge-success">v2.0 PRO</span>
         </div>
