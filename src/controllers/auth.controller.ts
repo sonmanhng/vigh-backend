@@ -10,7 +10,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   name: z.string().min(2),
-  role: z.enum(['SuperAdmin', 'VienTruong', 'VienPho', 'TruongPhong', 'ChuyenVien', 'ADMIN', 'MANAGER', 'USER']).optional(),
+  role: z.enum(['SuperAdmin', 'VienTruong', 'VienPho', 'TruongPhong', 'ChuyenVien', 'Student', 'ADMIN', 'MANAGER', 'USER']).optional(),
   avatar: z.string().optional(),
   department: z.string().optional(),
   phone: z.string().optional(),

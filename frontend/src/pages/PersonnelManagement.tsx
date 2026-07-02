@@ -8,6 +8,7 @@ const ALL_ROLES = [
   { value: 'SuperAdmin', label: 'SuperAdmin - Quản Trị Cấp Cao' },
   { value: 'TruongPhong', label: 'Trưởng Phòng - Quản Lý Đơn Vị' },
   { value: 'ChuyenVien', label: 'Chuyên Viên - Nghiên Cứu Viên' },
+  { value: 'Student', label: 'Sinh Viên - Thực Tập Sinh' },
 ];
 
 export const PersonnelManagement: React.FC = () => {
@@ -16,7 +17,7 @@ export const PersonnelManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  
+
   // New user form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,7 +87,7 @@ export const PersonnelManagement: React.FC = () => {
         payload.password = password;
         await apiClient.post('/users', payload);
       }
-      
+
       setShowModal(false);
       // Reset form
       setEditingUserId(null);
@@ -235,12 +236,12 @@ export const PersonnelManagement: React.FC = () => {
                       {u.affiliations && u.affiliations.length > 0 ? (
                         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                           {u.affiliations.map((aff: string, idx: number) => (
-                            <span key={idx} style={{ 
-                              backgroundColor: 'rgba(0, 114, 229, 0.1)', 
-                              color: 'var(--primary)', 
-                              padding: '2px 8px', 
-                              borderRadius: '12px', 
-                              fontSize: '0.75rem', 
+                            <span key={idx} style={{
+                              backgroundColor: 'rgba(0, 114, 229, 0.1)',
+                              color: 'var(--primary)',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '0.75rem',
                               fontWeight: 600,
                               whiteSpace: 'nowrap'
                             }}>
@@ -256,8 +257,8 @@ export const PersonnelManagement: React.FC = () => {
                     <td>{u.phone || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>---</span>}</td>
                     <td>
                       {isManagerOrAdmin ? (
-                        <select 
-                          className="select-field" 
+                        <select
+                          className="select-field"
                           style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', width: 'auto', fontWeight: 600 }}
                           value={u.role}
                           onChange={(e) => handleRoleChange(u.id, e.target.value)}
@@ -276,15 +277,15 @@ export const PersonnelManagement: React.FC = () => {
                       <td style={{ textAlign: 'right' }}>
                         {isTopAdmin && u.id !== user?.id && (
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button 
-                              className="btn btn-secondary btn-sm" 
+                            <button
+                              className="btn btn-secondary btn-sm"
                               onClick={() => openEditModal(u)}
                               title="Sửa thông tin"
                             >
                               Sửa
                             </button>
-                            <button 
-                              className="btn btn-danger btn-sm" 
+                            <button
+                              className="btn btn-danger btn-sm"
                               onClick={() => handleDeleteUser(u.id, u.name)}
                               title="Xóa nhân sự"
                             >
@@ -310,7 +311,7 @@ export const PersonnelManagement: React.FC = () => {
               <div className="modal-title">{editingUserId ? 'Chỉnh Sửa Nhân Sự' : 'Thêm Nhân Sự Mới Viện VIGH'}</div>
               <button type="button" className="modal-close-btn" onClick={() => setShowModal(false)}>Đóng</button>
             </div>
-            
+
             <form onSubmit={handleSubmitUser}>
               <div className="modal-body">
                 <div className="input-group">
@@ -342,7 +343,7 @@ export const PersonnelManagement: React.FC = () => {
 
                 <div className="input-group">
                   <label className="input-label">Cơ quan / Tổ chức công tác (Affiliations)</label>
-                  <input type="text" className="input-field" placeholder="VD: Đại học Bách Khoa, Viện VIGH" value={affiliations} onChange={(e) => setAffiliations(e.target.value)} />
+                  <input type="text" className="input-field" placeholder="VD: Vietnam Institute of Ginseng and Herbal Medicine, X University" value={affiliations} onChange={(e) => setAffiliations(e.target.value)} />
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Các cơ quan cách nhau bằng dấu phẩy (,)</span>
                 </div>
 
