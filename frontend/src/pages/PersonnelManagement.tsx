@@ -144,12 +144,12 @@ export const PersonnelManagement: React.FC = () => {
           <table className="modern-table">
             <thead>
               <tr>
-                <th>Cán bộ / Avatar</th>
-                <th>Tài khoản Email</th>
-                <th>Cơ quan (Affiliations)</th>
-                <th>Phòng Ban / Đơn vị</th>
-                <th>Số Điện Thoại</th>
-                <th>Chức Vụ (Role)</th>
+                <th style={{ width: '25%' }}>Cán bộ</th>
+                <th style={{ width: '15%' }}>Tài khoản Email</th>
+                <th style={{ width: '15%' }}>Cơ quan</th>
+                <th style={{ width: '15%' }}>Phòng Ban / Đơn vị</th>
+                <th style={{ width: '10%' }}>Số Điện Thoại</th>
+                <th style={{ width: '15%' }}>Chức Vụ</th>
                 {isManagerOrAdmin && <th style={{ textAlign: 'right' }}>Thao tác</th>}
               </tr>
             </thead>
@@ -166,9 +166,9 @@ export const PersonnelManagement: React.FC = () => {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
                         {u.avatar ? (
-                          <img src={u.avatar} alt={u.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--primary)' }} />
+                          <img src={u.avatar} alt={u.name} style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', flexShrink: 0, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--primary)' }} />
                         ) : (
-                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
+                          <div style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', flexShrink: 0, borderRadius: '50%', backgroundColor: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
                             {getInitials(u.name)}
                           </div>
                         )}
