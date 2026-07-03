@@ -173,6 +173,10 @@ export const PersonnelManagement: React.FC = () => {
     return <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Đang tải danh sách nhân sự Viện VIGH...</div>;
   }
 
+  if (selectedUserId) {
+    return <PersonalProfile userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+  }
+
   return (
     <div className="content-area">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -221,7 +225,7 @@ export const PersonnelManagement: React.FC = () => {
                     <td>
                       <div 
                         style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', cursor: 'pointer' }}
-                        onClick={() => navigate(`/personnel/${u.id}`)}
+                        onClick={() => setSelectedUserId(u.id.toString())}
                         title="Xem hồ sơ chi tiết"
                       >
                         {u.avatar ? (
