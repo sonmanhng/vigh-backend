@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { PersonalProfile } from './PersonalProfile';
 
 const ALL_ROLES = [
   { value: 'VienTruong', label: 'Viện Trưởng - Ban Lãnh Đạo Viện' },
@@ -31,6 +32,7 @@ export const PersonnelManagement: React.FC = () => {
   const [avatar, setAvatar] = useState('');
   const [creating, setCreating] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const isManagerOrAdmin = user && ['SuperAdmin', 'VienTruong', 'VienPho', 'TruongPhong', 'ADMIN', 'MANAGER'].includes(user.role);
   const isTopAdmin = user && ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(user.role);
