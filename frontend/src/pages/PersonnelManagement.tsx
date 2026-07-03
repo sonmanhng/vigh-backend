@@ -256,13 +256,12 @@ export const PersonnelManagement: React.FC = () => {
                     <td>{u.department || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Chưa cập nhật</span>}</td>
                     <td>{u.phone || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>---</span>}</td>
                     <td>
-                      {isManagerOrAdmin ? (
+                      {isTopAdmin ? (
                         <select
                           className="select-field"
                           style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem', width: 'auto', fontWeight: 600 }}
                           value={u.role}
                           onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          disabled={!isTopAdmin && u.id !== user?.id && ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(u.role)}
                         >
                           {ALL_ROLES.map(r => (
                             <option key={r.value} value={r.value}>{r.label.split(' - ')[0]}</option>
@@ -334,7 +333,7 @@ export const PersonnelManagement: React.FC = () => {
 
                 <div className="input-group">
                   <label className="input-label">Chức vụ / Quyền hạn (*)</label>
-                  <select className="select-field" value={role} onChange={(e) => setRole(e.target.value)}>
+                  <select className="select-field" value={role} onChange={(e) => setRole(e.target.value)} disabled={!isTopAdmin}>
                     {ALL_ROLES.map(r => (
                       <option key={r.value} value={r.value}>{r.label}</option>
                     ))}

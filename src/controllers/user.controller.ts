@@ -120,6 +120,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const createUser = async (req: Request, res: Response) => {
   try {
     const data = createUserSchema.parse(req.body);
+
+    const isTopAdmin = ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(req.user!.role);
+    if (!isTopAdmin && data.role && ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN', 'TruongPhong', 'MANAGER'].includes(data.role)) {
+      data.role = 'ChuyenVien'; // Downgrade unauthorized role assignment
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
@@ -164,6 +170,11 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const data = updateUserRoleSchema.parse(req.body);
+
+    const isTopAdmin = ['SuperAdmin', 'VienTruong', 'VienPho', 'ADMIN'].includes(req.user!.role);
+    if (!isTopAdmin && data.role) {
+      delete data.role;
+    }
 
     const updated = await prisma.user.update({
       where: { id },
