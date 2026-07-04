@@ -13,8 +13,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    // In dev mode, connect to localhost. In prod, connect to same origin.
-    const socketUrl = import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin;
+    // In dev mode, connect to localhost. In prod, connect to the backend API origin.
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // Remove /api from the URL to get the base origin for socket.io
+    const socketUrl = apiUrl.replace(/\/api$/, '');
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
     });
