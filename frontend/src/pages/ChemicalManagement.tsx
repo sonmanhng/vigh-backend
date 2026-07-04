@@ -280,16 +280,12 @@ export const ChemicalManagement: React.FC = () => {
           {/* Stat Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div className="card" style={{ padding: '1.1rem', borderLeft: '4px solid var(--primary)' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>Tổng chủng loại</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>Tổng số hoá chất</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>{chemicals.length} <span style={{ fontSize: '1rem' }}>loại</span></div>
             </div>
             <div className="card" style={{ padding: '1.1rem', borderLeft: lowCount > 0 ? '4px solid #FF4D4F' : '4px solid #52C41A', background: lowCount > 0 ? '#FFF9F9' : undefined }}>
-              <div style={{ color: lowCount > 0 ? '#CF1322' : 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>Dưới ngưỡng cảnh báo</div>
+              <div style={{ color: lowCount > 0 ? '#CF1322' : 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>Lượng hoá chất cảnh báo</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: lowCount > 0 ? '#CF1322' : 'var(--text-main)' }}>{lowCount} <span style={{ fontSize: '1rem' }}>loại</span></div>
-            </div>
-            <div className="card" style={{ padding: '1.1rem', borderLeft: '4px solid #1890FF' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 600 }}>Tổng giá trị kho</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>{fmtVND(totalValue)}</div>
             </div>
           </div>
 
