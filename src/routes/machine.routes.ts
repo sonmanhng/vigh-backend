@@ -4,7 +4,9 @@ import {
   createMachine,
   addMachineLog,
   getMachineLogs,
-  getMachineStatistics
+  getMachineStatistics,
+  updateMachine,
+  deleteMachine
 } from '../controllers/machine.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 
@@ -17,5 +19,7 @@ router.get('/logs', getMachineLogs);
 router.post('/logs', addMachineLog);
 router.get('/', getMachines);
 router.post('/', createMachine);
+router.put('/:id', updateMachine);
+router.delete('/:id', deleteMachine);
 
 export default router;

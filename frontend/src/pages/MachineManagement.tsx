@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { Download, Plus, Search, Filter } from 'lucide-react';
+import { Download, Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 
 interface Machine {
   id: number;
@@ -58,8 +58,8 @@ export const MachineManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Modals
-  const [modal, setModal] = useState<'none' | 'import' | 'consume'>('none');
+  const [modal, setModal] = useState<'none' | 'import' | 'edit' | 'consume'>('none');
+  const [editingId, setEditingId] = useState<number | null>(null);
   
   // Forms
   const [importForm, setImportForm] = useState({
@@ -125,12 +125,40 @@ export const MachineManagement: React.FC = () => {
   const handleImportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiClient.post('/machines', importForm);
+      if (modal === 'edit' && editingId) {
+        await apiClient.put(`/machines/${editingId}`, importForm);
+      } else {
+        await apiClient.post('/machines', importForm);
+      }
       setModal('none');
+      setEditingId(null);
       fetchMachines();
       setImportForm({ code: '', name: '', category: '', department: 'Phòng Công nghệ Dược', characteristics: '', status: 'IN_USE' });
     } catch (e: any) {
-      setError(e.response?.data?.error || 'Lỗi nhập thiết bị');
+      setError(e.response?.data?.error || 'Lỗi lưu thiết bị');
+    }
+  };
+
+  const handleEdit = (m: Machine) => {
+    setImportForm({
+      code: m.code,
+      name: m.name,
+      category: m.category || '',
+      department: m.department,
+      characteristics: m.characteristics || '',
+      status: m.status
+    });
+    setEditingId(m.id);
+    setModal('edit');
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xoá thiết bị này?')) return;
+    try {
+      await apiClient.delete(`/machines/${id}`);
+      fetchMachines();
+    } catch (e: any) {
+      setError(e.response?.data?.error || 'Lỗi xoá thiết bị');
     }
   };
 
@@ -223,6 +251,7 @@ export const MachineManagement: React.FC = () => {
                   <th style={{ padding: '1rem' }}>Đơn vị sử dụng</th>
                   <th style={{ padding: '1rem' }}>Đặc điểm</th>
                   <th style={{ padding: '1rem' }}>Tình trạng</th>
+                  <th style={{ padding: '1rem', width: '100px', textAlign: 'center' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,6 +273,16 @@ export const MachineManagement: React.FC = () => {
                       }}>
                         {m.status === 'IN_USE' ? 'Có sử dụng' : 'Không sử dụng'}
                       </span>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        <button className="icon-btn edit-btn" onClick={() => handleEdit(m)} title="Sửa">
+                          <Edit size={16} />
+                        </button>
+                        <button className="icon-btn delete-btn" onClick={() => handleDelete(m.id)} title="Xoá">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -356,13 +395,13 @@ export const MachineManagement: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: NHẬP THIẾT BỊ */}
-      {modal === 'import' && (
-        <div className="modal-overlay" onClick={() => { setModal('none'); setError(null); }}>
+      {/* MODAL: NHẬP THIẾT BỊ / SỬA THIẾT BỊ */}
+      {(modal === 'import' || modal === 'edit') && (
+        <div className="modal-overlay" onClick={() => { setModal('none'); setError(null); setEditingId(null); }}>
           <div className="modal-content" style={{ maxWidth: '640px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <div className="modal-title">Nhập thiết bị mới</div>
-              <button className="modal-close-btn" onClick={() => { setModal('none'); setError(null); }}>Đóng</button>
+              <div className="modal-title">{modal === 'edit' ? 'Cập nhật thiết bị' : 'Nhập thiết bị mới'}</div>
+              <button className="modal-close-btn" onClick={() => { setModal('none'); setError(null); setEditingId(null); }}>Đóng</button>
             </div>
             <form onSubmit={handleImportSubmit}>
               <div className="modal-body" style={{ display: 'grid', gap: '1rem' }}>
@@ -410,8 +449,8 @@ export const MachineManagement: React.FC = () => {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => { setModal('none'); setError(null); }}>Huỷ</button>
-                <button type="submit" className="btn btn-primary">Lưu thiết bị</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setModal('none'); setError(null); setEditingId(null); }}>Huỷ</button>
+                <button type="submit" className="btn btn-primary">{modal === 'edit' ? 'Lưu cập nhật' : 'Lưu thiết bị'}</button>
               </div>
             </form>
           </div>

@@ -194,3 +194,65 @@ export const getMachineStatistics = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi lấy thống kê máy móc' });
   }
 };
+
+// DELETE /api/machines/:id - Xoá máy móc
+export const deleteMachine = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if machine is used in logs
+    const logCount = await prisma.machineLog.count({
+      where: { machineId: Number(id) }
+    });
+
+    if (logCount > 0) {
+      return res.status(400).json({ error: 'Không thể xoá thiết bị đã có dữ liệu tiêu hao. Vui lòng chuyển trạng thái sang "Không sử dụng".' });
+    }
+
+    await prisma.machine.delete({
+      where: { id: Number(id) }
+    });
+    
+    res.json({ message: 'Xoá thiết bị thành công' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+};
+
+// PUT /api/machines/:id - Cập nhật máy móc
+export const updateMachine = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { code, name, category, department, characteristics, status } = req.body;
+    
+    // Check code duplication
+    if (code) {
+      const existing = await prisma.machine.findFirst({
+        where: { 
+          code, 
+          id: { not: Number(id) } 
+        }
+      });
+      if (existing) {
+        return res.status(400).json({ error: 'Mã tài sản đã tồn tại' });
+      }
+    }
+
+    const machine = await prisma.machine.update({
+      where: { id: Number(id) },
+      data: {
+        code,
+        name,
+        category,
+        department,
+        characteristics,
+        status,
+      }
+    });
+    res.json(machine);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+};
