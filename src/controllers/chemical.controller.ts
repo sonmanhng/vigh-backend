@@ -419,6 +419,17 @@ export const exportProposalToExcel = async (req: Request, res: Response) => {
 
     const items = proposal.items;
     
+    // Clear default template data in rows 10 to 14
+    for (let i = 0; i < 5; i++) {
+      const rowNum = 10 + i;
+      worksheet.getCell(`A${rowNum}`).value = '';
+      worksheet.getCell(`B${rowNum}`).value = '';
+      worksheet.getCell(`C${rowNum}`).value = '';
+      worksheet.getCell(`D${rowNum}`).value = '';
+      worksheet.getCell(`E${rowNum}`).value = '';
+      worksheet.getCell(`F${rowNum}`).value = '';
+    }
+
     // Rows 10 to 14 are available in the template. 
     // If we have more than 5 items, we need to insert rows before filling data to shift signatures down
     if (items.length > 5) {
