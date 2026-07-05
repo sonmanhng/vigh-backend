@@ -276,11 +276,11 @@ export const MachineManagement: React.FC = () => {
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                        <button className="icon-btn edit-btn" onClick={() => handleEdit(m)} title="Sửa">
-                          <Edit size={16} />
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(m)} title="Sửa thông tin">
+                          Sửa
                         </button>
-                        <button className="icon-btn delete-btn" onClick={() => handleDelete(m.id)} title="Xoá">
-                          <Trash2 size={16} />
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(m.id)} title="Xóa thiết bị">
+                          Xóa
                         </button>
                       </div>
                     </td>
