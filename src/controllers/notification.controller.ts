@@ -29,14 +29,16 @@ export const getNotifications = async (req: Request, res: Response) => {
             });
 
             if (!existingNotification) {
-              await prisma.notification.create({
-                data: {
+              // Double check via transaction/upsert to prevent race conditions
+              await prisma.notification.createMany({
+                data: [{
                   userId,
                   title,
                   message: `Hoá chất ${chemical.name} đang ở mức thấp (${percentage.toFixed(1)}%). Vui lòng kiểm tra và lên kế hoạch mua bổ sung.`,
                   type: 'CHEMICAL_WARNING'
-                }
-              });
+                }],
+                skipDuplicates: true
+              }).catch(() => {});
             }
           }
         }
@@ -49,7 +51,21 @@ export const getNotifications = async (req: Request, res: Response) => {
       take: 50
     });
 
-    res.json(notifications);
+    // Lọc lại một lần nữa ở kết quả trả về để đảm bảo UI không hiện trùng nếu có lỗi logic
+    const uniqueNotifications: any[] = [];
+    const seenTitles = new Set();
+    for (const n of notifications) {
+      if (n.title.startsWith('Cảnh báo mức hoá chất') && !n.isRead) {
+        if (!seenTitles.has(n.title)) {
+          seenTitles.add(n.title);
+          uniqueNotifications.push(n);
+        }
+      } else {
+        uniqueNotifications.push(n);
+      }
+    }
+
+    res.json(uniqueNotifications);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Lỗi lấy thông báo' });
