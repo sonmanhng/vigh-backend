@@ -394,7 +394,7 @@ export const exportProposalToExcel = async (req: Request, res: Response) => {
         approver2: { select: { name: true, role: true } },
         items: {
           include: {
-            project: { select: { code: true } }
+            project: { select: { code: true, name: true } }
           }
         }
       }
@@ -449,7 +449,14 @@ export const exportProposalToExcel = async (req: Request, res: Response) => {
       worksheet.getCell(`C${rowNum}`).value = item.unit;
       worksheet.getCell(`D${rowNum}`).value = item.quantity;
       worksheet.getCell(`E${rowNum}`).value = item.phase || '';
-      worksheet.getCell(`F${rowNum}`).value = item.project?.code || '';
+
+      let projectDisplay = '';
+      if (item.project) {
+        projectDisplay = `${item.project.code} - ${item.project.name}`;
+      } else if (item.projectCode) {
+        projectDisplay = item.projectCode;
+      }
+      worksheet.getCell(`F${rowNum}`).value = projectDisplay;
     }
 
     // Signatures
