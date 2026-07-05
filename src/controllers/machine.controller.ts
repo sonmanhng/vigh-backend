@@ -170,6 +170,7 @@ export const getMachineStatistics = async (req: Request, res: Response) => {
           machineMap[log.machineId].projectsMap[log.projectId] = {
             projectId: log.projectId,
             projectName: log.project?.name || 'Không xác định',
+            projectCode: log.project?.code || '',
             minutes: 0,
           };
         }
