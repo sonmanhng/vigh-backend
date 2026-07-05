@@ -12,7 +12,7 @@ const chemicalSchema = z.object({
   specification: z.number().min(0.001),
   invoicePrice: z.number().min(0),
   importDate: z.string(),
-  alertThreshold: z.number().min(1).max(100).default(50),
+  alertThreshold: z.number().min(0).default(5),
   location: z.string().optional(),
   note: z.string().optional(),
 });
@@ -59,6 +59,27 @@ export const createChemical = async (req: Request, res: Response) => {
     const data = chemicalSchema.parse(req.body);
     const unitPrice = data.invoicePrice / data.specification;
 
+    const existing = await prisma.chemical.findUnique({ where: { code: data.code } });
+
+    if (existing) {
+      const updated = await prisma.chemical.update({
+        where: { code: data.code },
+        data: {
+          quantity: { increment: data.quantity },
+          transactions: {
+            create: {
+              type: 'IMPORT',
+              quantity: data.quantity,
+              note: `Nhập bổ sung — Phiếu ngày ${data.importDate}`,
+              createdById: (req as any).user?.id,
+            },
+          },
+        },
+      });
+      getIO().emit('sync_chemicals');
+      return res.status(200).json(updated);
+    }
+
     const chemical = await prisma.chemical.create({
       data: {
         code: data.code,
@@ -88,9 +109,6 @@ export const createChemical = async (req: Request, res: Response) => {
     getIO().emit('sync_chemicals');
     res.status(201).json(chemical);
   } catch (err: any) {
-    if (err.code === 'P2002') {
-      return res.status(409).json({ error: `Mã hoá chất "${req.body.code}" đã tồn tại` });
-    }
     if (err instanceof z.ZodError) {
       return res.status(400).json({ error: 'Dữ liệu không hợp lệ', details: (err as any).errors });
     }

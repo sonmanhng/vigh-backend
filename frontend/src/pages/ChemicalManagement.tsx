@@ -72,11 +72,11 @@ type Tab = 'warehouse' | 'proposals' | 'statistics' | 'history';
 const fmtVND = (n: number) => n.toLocaleString('vi-VN') + ' đ';
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('vi-VN');
 const getPercent = (c: Chemical) => Math.round((c.quantity / c.maxQuantity) * 100);
-const isLow = (c: Chemical) => getPercent(c) < c.alertThreshold;
+const isLow = (c: Chemical) => c.quantity < c.alertThreshold;
 
 // ─── Notification helper ───────────────────────────────────────────────────────
-async function fireAlert(name: string, pct: number, threshold: number) {
-  const body = `⚠️ ${name} còn ${pct}% — dưới ngưỡng cảnh báo ${threshold}%! Cần bổ sung ngay.`;
+async function fireAlert(name: string, quantity: number, threshold: number, unit: string) {
+  const body = `⚠️ ${name} còn lại ${quantity} ${unit} — dưới ngưỡng cảnh báo (${threshold} ${unit})! Cần bổ sung ngay.`;
   try {
     const { isTauri } = await import('@tauri-apps/api/core');
     if (isTauri()) {
@@ -96,7 +96,7 @@ const emptyImport = () => ({
   code: '', name: '', unit: 'Lít', quantity: '' as number | '',
   maxQuantity: '' as number | '', specification: '' as number | '',
   invoicePrice: '' as number | '', importDate: new Date().toISOString().split('T')[0],
-  alertThreshold: 50, location: '', note: '',
+  alertThreshold: 5, location: '', note: '',
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -144,7 +144,7 @@ export const ChemicalManagement: React.FC = () => {
       setChemicals(res.data);
       // Fire alert for any low items
       res.data.filter(isLow).forEach(c => {
-        fireAlert(c.name, getPercent(c), c.alertThreshold);
+        fireAlert(c.name, c.quantity, c.alertThreshold, c.unit);
       });
     } catch (e: any) {
       setError(e.response?.data?.error || 'Lỗi tải danh sách hoá chất');
@@ -254,7 +254,12 @@ export const ChemicalManagement: React.FC = () => {
       if (res.data.warning) {
         setAlertBanner(res.data.warning);
         const chem = chemicals.find(c => c.id === Number(exportForm.chemicalId));
-        if (chem) fireAlert(chem.name, getPercent({ ...chem, quantity: chem.quantity - Number(exportForm.quantity) }), chem.alertThreshold);
+        if (chem) {
+          const remainingQuantity = chem.quantity - Number(exportForm.quantity);
+          if (remainingQuantity < chem.alertThreshold) {
+            fireAlert(chem.name, remainingQuantity, chem.alertThreshold, chem.unit);
+          }
+        }
       }
     } catch (e: any) {
       setError(e.response?.data?.error || 'Lỗi xuất hoá chất');
@@ -772,8 +777,8 @@ export const ChemicalManagement: React.FC = () => {
                     <input type="date" className="input-field" required value={importForm.importDate} onChange={e => setImportForm(p => ({ ...p, importDate: e.target.value }))} />
                   </div>
                   <div className="input-group">
-                    <label className="input-label">Ngưỡng Cảnh Báo (%)</label>
-                    <input type="number" min="1" max="99" className="input-field" value={importForm.alertThreshold} onChange={e => setImportForm(p => ({ ...p, alertThreshold: Number(e.target.value) }))} />
+                    <label className="input-label">Ngưỡng Cảnh Báo (Số lượng)</label>
+                    <input type="number" step="0.01" className="input-field" required value={importForm.alertThreshold} onChange={e => setImportForm(p => ({ ...p, alertThreshold: Number(e.target.value) }))} />
                   </div>
                 </div>
 
@@ -861,9 +866,8 @@ export const ChemicalManagement: React.FC = () => {
                 </select>
               </div>
               <div className="input-group" style={{ marginBottom: 0 }}>
-                <label className="input-label">Ngưỡng Cảnh Báo: <strong style={{ color: 'var(--primary)' }}>{alertForm.threshold}%</strong></label>
-                <input type="range" min="5" max="90" step="5" value={alertForm.threshold} onChange={e => setAlertForm(p => ({ ...p, threshold: Number(e.target.value) }))} style={{ width: '100%' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)' }}><span>5%</span><span>90%</span></div>
+                <label className="input-label">Ngưỡng Cảnh Báo (Số lượng): <strong style={{ color: 'var(--primary)' }}>{alertForm.threshold} {chemicals.find(c => c.id === Number(alertForm.chemicalId))?.unit}</strong></label>
+                <input type="number" step="0.01" className="input-field" value={alertForm.threshold} onChange={e => setAlertForm(p => ({ ...p, threshold: Number(e.target.value) }))} style={{ width: '100%' }} />
               </div>
             </div>
             <div className="modal-footer">
