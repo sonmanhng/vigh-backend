@@ -27,7 +27,8 @@ model User {
   chemicalProposals ChemicalProposal[] @relation("CreatorProposals")
   approved1Proposals ChemicalProposal[] @relation("Approver1Proposals")
   approved2Proposals ChemicalProposal[] @relation("Approver2Proposals")
-  createdAt      DateTime  @default(now())
+  machineLogs      MachineLog[] @relation("MachineLogCreator")
+  createdAt        DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
 
@@ -54,6 +55,7 @@ model Project {
   tasks            Task[]
   researchContents ResearchContent[]
   chemicalProposalItems ChemicalProposalItem[]
+  machineLogs      MachineLog[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }
@@ -144,4 +146,30 @@ model ChemicalProposalItem {
   projectId    Int?
   project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   projectCode  String?
+}
+
+model Machine {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique // Mã tài sản
+  name           String       // Tên tài sản
+  category       String?      // Phân loại
+  department     String       // Đơn vị sử dụng
+  characteristics String?     // Đặc điểm
+  status         String       @default("IN_USE") // IN_USE, NOT_IN_USE
+  logs           MachineLog[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model MachineLog {
+  id          Int      @id @default(autoincrement())
+  machineId   Int
+  machine     Machine  @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  date        DateTime // Ngày tiêu hao
+  minutes     Int      // Số phút tiêu hao
+  projectId   Int?     // Dự án sử dụng máy
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdById Int?
+  creator     User?    @relation("MachineLogCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
 }
