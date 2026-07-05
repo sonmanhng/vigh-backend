@@ -28,6 +28,7 @@ model User {
   approved1Proposals ChemicalProposal[] @relation("Approver1Proposals")
   approved2Proposals ChemicalProposal[] @relation("Approver2Proposals")
   machineLogs      MachineLog[] @relation("MachineLogCreator")
+  laborLogs        LaborLog[]   @relation("UserLaborLogs")
   createdAt        DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -56,6 +57,7 @@ model Project {
   researchContents ResearchContent[]
   chemicalProposalItems ChemicalProposalItem[]
   machineLogs      MachineLog[]
+  laborLogs        LaborLog[]   @relation("ProjectLaborLogs")
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }
@@ -172,4 +174,18 @@ model MachineLog {
   createdById Int?
   creator     User?    @relation("MachineLogCreator", fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
+}
+
+model LaborLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation("UserLaborLogs", fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime // Ngày ghi nhận
+  adminHours  Float    @default(0) // Giờ hành chính
+  proHours    Float    @default(0) // Giờ chuyên môn
+  cleanHours  Float    @default(0) // Giờ dọn dẹp
+  projectId   Int?     // Dự án liên quan
+  project     Project? @relation("ProjectLaborLogs", fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
