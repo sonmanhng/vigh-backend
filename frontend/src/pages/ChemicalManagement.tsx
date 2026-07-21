@@ -555,13 +555,13 @@ export const ChemicalManagement: React.FC = () => {
             <button className="btn" onClick={() => { setImportForm(emptyImport()); setModal('import'); }} style={{ background: 'var(--primary)', color: '#fff', border: 'none' }}>
               Nhập Hoá Chất Thường
             </button>
-            <button className="btn" onClick={() => setModal('export')} style={{ background: '#08979c', color: '#fff' }}>
+            <button className="btn" onClick={() => setModal('export')} style={{ background: 'var(--primary)', color: '#fff', border: 'none' }}>
               Xuất Hoá Chất
             </button>
-            <button className="btn" onClick={() => setModal('proposal')} style={{ background: '#722ED1', color: '#fff' }}>
+            <button className="btn" onClick={() => setModal('proposal')} style={{ background: 'var(--primary)', color: '#fff', border: 'none' }}>
               Đề Xuất Hoá Chất
             </button>
-            <button className="btn" onClick={() => setModal('alert')} style={{ background: '#D48806', color: '#fff' }}>
+            <button className="btn" onClick={() => setModal('alert')} style={{ background: 'var(--primary)', color: '#fff', border: 'none' }}>
               Tuỳ Chỉnh Cảnh Báo
             </button>
           </div>
