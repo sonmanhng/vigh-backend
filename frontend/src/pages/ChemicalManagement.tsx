@@ -855,6 +855,17 @@ export const ChemicalManagement: React.FC = () => {
                 </div>
 
                 <div className="input-group">
+                  <label className="input-label">Phòng Ban Quản Lý (*)</label>
+                  <select className="select-field" required value={importForm.department} onChange={e => setImportForm(p => ({ ...p, department: e.target.value }))}>
+                    <option value="">-- Chọn phòng ban quản lý --</option>
+                    <option value="Phòng Công nghệ Dược">Phòng Công nghệ Dược</option>
+                    <option value="Phòng Thử nghiệm Sinh học">Phòng Thử nghiệm Sinh học</option>
+                    <option value="Phòng Tài nguyên và Công nghệ Sinh học">Phòng Tài nguyên và Công nghệ Sinh học</option>
+                    <option value="Phòng Khoa học Công nghệ">Phòng Khoa học Công nghệ</option>
+                  </select>
+                </div>
+
+                <div className="input-group">
                   <label className="input-label">Vị trí lưu trữ</label>
                   <input type="text" className="input-field" placeholder="VD: Tủ A1 — Phòng Thí nghiệm" value={importForm.location} onChange={e => setImportForm(p => ({ ...p, location: e.target.value }))} />
                 </div>
